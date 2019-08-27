@@ -29,6 +29,7 @@ require (
 	github.com/frankban/quicktest v1.4.2 // indirect
 	github.com/go-redis/redis v6.15.5+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
+	github.com/gocql/gocql v0.0.0-20190810123941-df4b9cc33030
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gogo/protobuf v1.3.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
@@ -41,6 +42,7 @@ require (
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/linkedin/goavro/v2 v2.9.6
 	github.com/mailru/easyjson v0.7.0 // indirect
@@ -57,6 +59,7 @@ require (
 	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/ory/dockertest v3.3.4+incompatible
+	github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c // indirect
 	github.com/patrobinson/gokini v0.0.7
 	github.com/pebbe/zmq4 v1.0.0
 	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
