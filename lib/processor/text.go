@@ -376,6 +376,7 @@ func (t *Text) ProcessMessage(msg types.Message) ([]types.Message, types.Respons
 
 	t.mBatchSent.Incr(1)
 	t.mSent.Incr(int64(newMsg.Len()))
+
 	return msgs[:], nil
 }
 

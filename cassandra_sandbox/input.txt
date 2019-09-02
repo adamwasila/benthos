@@ -1,0 +1,25 @@
+{"part" : "partition", "id":10, "ascii": "hello ascii"}
+{"part" : "partition", "id":20, "bigint": 123}
+{"part" : "partition", "id":30, "blob": "0xcafebabe"}
+{"part" : "partition", "id":40, "boolean": true}
+{"part" : "partition", "id":41, "boolean": false}
+{"part" : "partition", "id":42, "boolean": "true"}
+{"part" : "partition", "id":43, "boolean": "True"}
+{"part" : "partition", "id":50, "decimal": 42}
+{"part" : "partition", "id":51, "decimal": 36.6}
+{"part" : "partition", "id":60, "double": 1.5}
+{"part" : "partition", "id":61, "double": 1.0}
+{"part" : "partition", "id":70, "float": 7.8}
+{"part" : "partition", "id":71, "float": 7.0}
+{"part" : "partition", "id":80, "inet": "192.168.0.1"}
+{"part" : "partition", "id":81, "inet": "FE80::0202:B3FF:FE1E:8329"}
+{"part" : "partition", "id":82, "inet": "2001:db8::1"}
+{"part" : "partition", "id":90, "int": 111}
+{"part" : "partition", "id":100, "text": "hello text"}
+{"part" : "partition", "id":110, "timestamp": "2019-02-03T12:42:01Z"}
+{"part" : "partition", "id":111, "timestamp": "now"}
+{"part" : "partition", "id":120, "timeuuid": "5b592ad0-bcdf-11e9-8080-808080808080"}
+{"part" : "partition", "id":130, "uuid": "35884500-b505-406f-b8c5-cc50b4d070ce"}
+{"part" : "partition", "id":140, "varchar": "hello varchar"}
+{"part" : "partition", "id":150, "varint": 43}
+{"part" : "partition", "id":151, "varint": "123456789123456789123456789"}

@@ -1,0 +1,29 @@
+input:
+  type: nats
+  nats:
+    prefetch_count: 32
+    queue: bq
+    subject: bm
+    urls:
+    - nats://localhost:4222
+pipeline:
+  processors:
+    - type: text
+      text:
+        operator: quote
+    - type: text
+      text:
+        operator: set
+        value: '{"part":"p", "id":${!timestamp_unix_nano}, "timeuuid":"${!uuid_v1}", "ascii":${!content}}'
+output:
+  type: drop_on_error
+  drop_on_error:
+    type: cassandra
+    cassandra:
+      nodes:
+      - "127.0.0.1"
+      password_authenticator:
+        enabled: true
+        username: cassandra
+        password: cassandra
+

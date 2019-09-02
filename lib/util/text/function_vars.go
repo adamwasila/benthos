@@ -208,6 +208,13 @@ var functionVars = map[string]func(msg Message, arg string) []byte{
 	"batch_size": func(m Message, _ string) []byte {
 		return strconv.AppendInt(nil, int64(m.Len()), 10)
 	},
+	"uuid_v1": func(_ Message, _ string) []byte {
+		u1, err := uuid.NewV1()
+		if err != nil {
+			panic(err)
+		}
+		return []byte(u1.String())
+	},
 	"uuid_v4": func(_ Message, _ string) []byte {
 		u4, err := uuid.NewV4()
 		if err != nil {

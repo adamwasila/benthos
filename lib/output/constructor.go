@@ -63,6 +63,7 @@ const (
 	TypeAMQP            = "amqp"
 	TypeBroker          = "broker"
 	TypeCache           = "cache"
+	TypeCassandra       = "cassandra"
 	TypeDrop            = "drop"
 	TypeDropOnError     = "drop_on_error"
 	TypeDynamic         = "dynamic"
@@ -108,6 +109,7 @@ type Config struct {
 	AMQP            writer.AMQPConfig            `json:"amqp" yaml:"amqp"`
 	Broker          BrokerConfig                 `json:"broker" yaml:"broker"`
 	Cache           writer.CacheConfig           `json:"cache" yaml:"cache"`
+	Cassandra       writer.CassandraConfig       `json:"cassandra" yaml:"cassandra"`
 	Drop            writer.DropConfig            `json:"drop" yaml:"drop"`
 	DropOnError     DropOnErrorConfig            `json:"drop_on_error" yaml:"drop_on_error"`
 	Dynamic         DynamicConfig                `json:"dynamic" yaml:"dynamic"`
@@ -154,6 +156,7 @@ func NewConfig() Config {
 		AMQP:            writer.NewAMQPConfig(),
 		Broker:          NewBrokerConfig(),
 		Cache:           writer.NewCacheConfig(),
+		Cassandra:       writer.NewCassandraConfig(),
 		Drop:            writer.NewDropConfig(),
 		DropOnError:     NewDropOnErrorConfig(),
 		Dynamic:         NewDynamicConfig(),

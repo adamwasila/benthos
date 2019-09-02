@@ -57,6 +57,16 @@ func NewConfig() Config {
 
 //------------------------------------------------------------------------------
 
+type CompiledBackOff struct {
+	maxRetries      int
+	initialInterval time.Duration
+	maxInterval     time.Duration
+	maxElapsedTime  time.Duration
+}
+
+// func (c *Config) Compile() (backoff.BackOff, error) {
+// }
+
 // Get returns a valid *backoff.ExponentialBackoff based on the configuration
 // values of Config.
 func (c *Config) Get() (backoff.BackOff, error) {
@@ -65,6 +75,16 @@ func (c *Config) Get() (backoff.BackOff, error) {
 		return nil, err
 	}
 	return ctor(), nil
+}
+
+// MustGet returns a valid *backoff.ExponentialBackoff based on the configuration
+// values of Config. It will panic for invalid configuration.
+func (c *Config) MustGet() backoff.BackOff {
+	ctor, err := c.GetCtor()
+	if err != nil {
+		panic(err)
+	}
+	return ctor()
 }
 
 // GetCtor returns a constructor for a backoff.Backoff based on the

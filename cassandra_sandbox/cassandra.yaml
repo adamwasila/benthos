@@ -1,0 +1,27 @@
+input:
+  type: file
+  file:
+    delimiter: "\n"
+    max_buffer: 1e+06
+    multipart: false
+    path: "input.txt"
+pipeline:
+  processors:
+  - type: json
+    json:
+      operator: clean
+      parts: []
+      path: ""
+      value: ""
+  threads: 1
+output:
+  type: cassandra
+  cassandra:
+    nodes:
+    - "127.0.0.1"
+    password_authenticator:
+      enabled: true
+      username: "cassandra"
+      password: "cassandra"
+
+

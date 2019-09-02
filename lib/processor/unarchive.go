@@ -27,6 +27,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/Jeffail/benthos/v3/lib/log"
@@ -161,6 +162,17 @@ func binaryUnarchive(part types.Part) ([]types.Part, error) {
 	return parts, nil
 }
 
+func blanksUnarchive(part types.Part) ([]types.Part, error) {
+	lines := strings.Fields(string(part.Get()))
+	parts := make([]types.Part, len(lines))
+	for i, l := range lines {
+		newPart := part.Copy()
+		newPart.Set([]byte(l))
+		parts[i] = newPart
+	}
+	return parts, nil
+}
+
 func linesUnarchive(part types.Part) ([]types.Part, error) {
 	lines := bytes.Split(part.Get(), []byte("\n"))
 	parts := make([]types.Part, len(lines))
@@ -221,6 +233,8 @@ func strToUnarchiver(str string) (unarchiveFunc, error) {
 		return zipUnarchive, nil
 	case "binary":
 		return binaryUnarchive, nil
+	case "blanks":
+		return linesUnarchive, nil
 	case "lines":
 		return linesUnarchive, nil
 	case "json_documents":

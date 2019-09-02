@@ -1,0 +1,46 @@
+input:
+  type: file
+  file:
+    path: "1gb-2.txt"
+    multipart: true
+  processors:
+    - type: split
+      split:
+        size: 1000
+    - type: for_each
+      for_each:
+        - type: text
+          text:
+            operator: quote
+        - type: text
+          text:
+            operator: set
+            value: '{"part":"p", "ascii":"abc", "id":${!timestamp_unix_nano}, "timeuuid":"${!uuid_v1}", "text":${!content}}'
+output:
+        #  type: file
+        #  file:
+        #    delimiter: "\n"
+        #    path: "bench_output.txt"
+        #  type: drop_on_error
+        #  drop_on_error:
+  type: broker
+  broker:
+    pattern: greedy
+    copies: 1
+    outputs:
+    - cassandra:
+        nodes:
+        - "127.0.0.1"
+        parts_async_send: true
+        password_authenticator:
+          enabled: true
+          username: cassandra
+          password: cassandra
+        max_retries: 3
+metrics:
+  type: prometheus
+  prefix: benthos
+  prometheus:
+    push_interval: 1s 
+    push_job_name: benthos
+    push_url: "http://localhost:9091"
