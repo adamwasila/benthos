@@ -31,7 +31,7 @@ output:
     - cassandra:
         nodes:
         - "127.0.0.1"
-        parts_async_send: true
+        async: true
         password_authenticator:
           enabled: true
           username: cassandra
