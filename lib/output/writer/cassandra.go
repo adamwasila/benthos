@@ -22,6 +22,8 @@ package writer
 
 import (
 	"fmt"
+	"math"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -81,6 +83,7 @@ type Cassandra struct {
 	stats         metrics.Type
 	session       *gocql.Session
 	query         string
+	boff          backoff.ExponentialBackOff
 	mQueryLatency metrics.StatTimer
 	connLock      sync.RWMutex
 }
@@ -90,16 +93,11 @@ func NewCassandra(conf CassandraConfig, log log.Modular, stats metrics.Type) (*C
 	keyspace := conf.Keyspace
 	tablename := conf.Table
 	query := fmt.Sprintf("INSERT INTO %s.%s JSON ?", keyspace, tablename)
-	_, err := conf.Get()
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse retry fields: %v", err)
-	}
 	c := Cassandra{
-		log:   log,
-		stats: stats,
-		conf:  conf,
-		query: query,
-
+		log:           log,
+		stats:         stats,
+		conf:          conf,
+		query:         query,
 		mQueryLatency: stats.GetTimer("query.latency"),
 	}
 	return &c, nil
@@ -122,6 +120,16 @@ func (c *Cassandra) Connect() error {
 	conn.Consistency, err = gocql.ParseConsistencyWrapper(c.conf.Consistency)
 	if err != nil {
 		return err
+	}
+	min, err := time.ParseDuration(c.conf.Config.Backoff.InitialInterval)
+	//TODO err
+	max, err := time.ParseDuration(c.conf.Config.Backoff.MaxInterval)
+	//TODO err
+
+	conn.RetryPolicy = &decorator{
+		NumRetries: int(c.conf.Config.MaxRetries),
+		Min:        min,
+		Max:        max,
 	}
 	session, err := conn.CreateSession()
 	if err != nil {
@@ -161,22 +169,7 @@ func (c *Cassandra) Write(msg types.Message) error {
 		var g errgroup.Group
 		msg.Iter(func(i int, p types.Part) error {
 			g.Go(func() error {
-				var boff backoff.BackOff
-				for {
-					err := c.writePart(session, p)
-					if err == nil {
-						return nil
-					}
-					if boff == nil {
-						boff = c.conf.MustGet()
-					}
-					next := boff.NextBackOff()
-					if next == backoff.Stop {
-						return err
-					}
-					c.log.Infof("Retrying with backoff for error: %s", err.Error())
-					time.After(next)
-				}
+				return c.writePart(session, p)
 			})
 			return nil
 		})
@@ -204,3 +197,56 @@ func (c *Cassandra) WaitForClose(timeout time.Duration) error {
 }
 
 //------------------------------------------------------------------------------
+
+type decorator struct {
+	NumRetries int
+	Min, Max   time.Duration
+}
+
+func (d *decorator) Attempt(q gocql.RetryableQuery) bool {
+	if q.Attempts() > d.NumRetries {
+		return false
+	}
+	time.Sleep(d.napTime(q.Attempts()))
+	return true
+}
+
+func getExponentialTime(min time.Duration, max time.Duration, attempts int) time.Duration {
+	if min <= 0 {
+		min = 100 * time.Millisecond
+	}
+	if max <= 0 {
+		max = 10 * time.Second
+	}
+	minFloat := float64(min)
+	napDuration := minFloat * math.Pow(2, float64(attempts-1))
+	// add some jitter
+	napDuration += rand.Float64()*minFloat - (minFloat / 2)
+	if napDuration > float64(max) {
+		return time.Duration(max)
+	}
+	return time.Duration(napDuration)
+}
+
+func (d *decorator) napTime(attempts int) time.Duration {
+	return getExponentialTime(d.Min, d.Max, attempts)
+}
+
+func (d *decorator) GetRetryType(err error) gocql.RetryType {
+	switch t := err.(type) {
+	// not enough replica alive to perform query with required consistency
+	case *gocql.RequestErrUnavailable:
+		if t.Alive > 0 {
+			return gocql.RetryNextHost
+		}
+		return gocql.Retry
+	// write timeout - uncertain whetever write was succesful or not
+	case *gocql.RequestErrWriteTimeout:
+		if t.Received > 0 {
+			return gocql.Ignore
+		}
+		return gocql.Retry
+	default:
+		return gocql.Rethrow
+	}
+}

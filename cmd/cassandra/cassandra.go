@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
+	"math/rand"
 	"time"
 
 	"github.com/gocql/gocql"
@@ -18,15 +20,6 @@ func main() {
 		Password: "cassandra",
 	}
 
-	erp := &gocql.ExponentialBackoffRetryPolicy{
-		NumRetries: 3,
-		Min:        3 * time.Second,
-		Max:        10 * time.Second,
-	}
-	cluster.RetryPolicy = &delegate{
-		rq: erp,
-	}
-
 	session, err := cluster.CreateSession()
 	if err != nil {
 		log.Fatalf("connecting error: %v", err)
@@ -34,23 +27,8 @@ func main() {
 	}
 	defer session.Close()
 
-	if err := session.Query(`INSERT INTO benthos.x (col1, col2) VALUES (?, ?)`, "hello world", gocql.TimeUUID()).Exec(); err != nil {
+	if err := session.Query(`INzERT INTO benthos.x (col1, col2) VALUES (?, ?)`, "hello world", gocql.TimeUUID()).Exec(); err != nil {
 		log.Fatalf(">>> %v", err)
 	}
 
-}
-
-type delegate struct {
-	rq gocql.RetryPolicy
-}
-
-func (d *delegate) Attempt(q gocql.RetryableQuery) bool {
-	r := d.rq.Attempt(q)
-	fmt.Printf("Attempt %d %v\n\n", q.Attempts(), r)
-	return r
-}
-
-func (d *delegate) GetRetryType(err error) gocql.RetryType {
-	fmt.Printf("retry type: %v\n\n", err)
-	return gocql.Retry
 }
